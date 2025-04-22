@@ -945,6 +945,14 @@ testDocumentation = {
     })
   end,
 
+  testReadmeExpressionsFilterAllBooksThatCost8P95Title = function()
+    local results, err = jp.nodes(data, "$.store.book[?(@.price==8.95)].title")
+    lu.assertNil(err)
+    lu.assertItemsEquals(results, {
+      { path = { "$", "store", "book", 0, "title" }, value = "Sayings of the Century" },
+    })
+  end,
+
   testReadmeExpressionsFilterAllFictionBooksCheaperThan30 = function()
     local results, err = jp.nodes(data, '$..book[?(@.price<30 && @.category=="fiction")]')
     lu.assertNil(err)

@@ -111,6 +111,7 @@ local MISMATCH = 0
 local MATCH_ONE = 1
 local MATCH_DESCENDANTS = 2
 local MATCH_PARTIAL = 3
+local MATCH_FILTER = 4
 
 -- Generate JsonPath grammer
 local jsonpath_grammer = (function()
@@ -416,7 +417,7 @@ local function eval_ast(ast, obj)
   return 0
 end
 
-function match_path(ast, path, parent, obj)
+function match_path(ast, path, parent, obj, skip)
   local descendants = false
   local ast_iter = ipairs(ast)
   local ast_key, ast_spec = ast_iter(ast, 0)
@@ -452,6 +453,9 @@ function match_path(ast, path, parent, obj)
       elseif ast_spec[1] == "filter" then
         -- match filter expression
         match_component = eval_ast(ast_spec, obj) and true or false
+        if match_component then
+          match = MATCH_FILTER
+        end
       end
     else
       if ast_spec == "*" then
@@ -482,15 +486,15 @@ function match_path(ast, path, parent, obj)
     end
   end
 
-  if match == MATCH_PARTIAL and ast_spec == nil and not descendants then
+  if (match == MATCH_PARTIAL or match == MATCH_FILTER) and ast_spec == nil and not descendants then
     match = MATCH_ONE
   end
   return match
 end
 
-local function match_tree(nodes, ast, path, parent, obj, count)
+local function match_tree(nodes, ast, path, parent, obj, count, skip)
   -- Try to match every node against AST
-  local match = match_path(ast, path, parent, obj)
+  local match = match_path(ast, path, parent, obj, skip)
   if match == MATCH_ONE or match == MATCH_DESCENDANTS then
     -- This node matches. Add path and value to result
     -- (if max result count not yet reached)
@@ -503,7 +507,11 @@ local function match_tree(nodes, ast, path, parent, obj, count)
         end
       end
     end
-    nodes[path] = obj
+    local fullpath = skip or {}
+    for _, elem in ipairs(path) do
+      table.insert(fullpath, elem)
+    end
+    nodes[fullpath] = obj
   end
   -- Recursively traverse children, if any
   if type(obj) == "table" and (match == MATCH_PARTIAL or match == MATCH_DESCENDANTS) then
@@ -513,7 +521,19 @@ local function match_tree(nodes, ast, path, parent, obj, count)
         table.insert(path1, p)
       end
       table.insert(path1, type(key) == "string" and key or (key - 1))
-      match_tree(nodes, ast, path1, obj, child, count)
+      match_tree(nodes, ast, path1, obj, child, count, skip)
+    end
+  end
+
+  if type(obj) == "table" and match == MATCH_FILTER then
+    for key, child in pairs(obj) do
+      local path1 = {}
+      table.insert(path1, type(key) == "string" and key or (key - 1))
+      local ast1 = {}
+      for i = #path + 1, #ast do
+        table.insert(ast1, ast[i])
+      end
+      match_tree(nodes, ast1, path1, obj, child, count, path)
     end
   end
 end
