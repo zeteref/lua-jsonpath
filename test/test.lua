@@ -1007,7 +1007,13 @@ testDocumentation = {
     local employee, err = jp.nodes(employees, '$[?(@.name == "Tom")]')
     lu.assertNil(err)
     lu.assertItemsEquals(employee, {
-      { path = { "$", 0 }, value = { name = "Tom" } },
+      {
+        path = { "$", 0 },
+        value = {
+          books = { { title = "Sword of Honour" }, { title = "The Lord of the Rings" } },
+          name = "Tom",
+        },
+      },
     })
   end,
 
@@ -1016,6 +1022,15 @@ testDocumentation = {
     lu.assertNil(err)
     lu.assertItemsEquals(employee, {
       { path = { "$", 0, "name" }, value = "Tom" },
+    })
+  end,
+
+  testReadmeEmploeeBookTitleByEmployeeNameAndBookTitle = function()
+    local employee, err =
+      jp.nodes(employees, '$[?(@.name == "Tom")].books[?(@.title == "The Lord of the Rings")].title')
+    lu.assertNil(err)
+    lu.assertItemsEquals(employee, {
+      { path = { "$", 0, "books", 1, "title" }, value = "The Lord of the Rings" },
     })
   end,
 

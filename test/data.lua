@@ -62,9 +62,22 @@ return {
   employees = {
     {
       name = "Tom",
+      books = {
+        {
+          title = "Sword of Honour",
+        },
+        {
+          title = "The Lord of the Rings",
+        },
+      },
     },
     {
       name = "Elle",
+      books = {
+        {
+          title = "Sayings of the Century",
+        },
+      },
     },
   },
 }
