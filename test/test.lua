@@ -53,7 +53,12 @@ package.path = "../?.lua;" .. package.path
 local jp = require("jsonpath")
 
 -- Test store
-local store = require("data")
+local store = {}
+local employees = {}
+local data = require("data")
+
+employees = data.employees
+store.store = data.store
 
 -- Helper: sort node table by path
 function sortByPath(nodes)
@@ -995,6 +1000,22 @@ testDocumentation = {
       { "$", "store", "book", 1, "author" },
       { "$", "store", "book", 2, "author" },
       { "$", "store", "book", 3, "author" },
+    })
+  end,
+
+  testReadmeEmploeeByName = function()
+    local employee, err = jp.nodes(employees, '$[?(@.name == "Tom")]')
+    lu.assertNil(err)
+    lu.assertItemsEquals(employee, {
+      { path = { "$", 0 }, value = { name = "Tom" } },
+    })
+  end,
+
+  testReadmeEmploeeNameByName = function()
+    local employee, err = jp.nodes(employees, '$[?(@.name == "Tom")].name')
+    lu.assertNil(err)
+    lu.assertItemsEquals(employee, {
+      { path = { "$", 0, "name" }, value = "Tom" },
     })
   end,
 

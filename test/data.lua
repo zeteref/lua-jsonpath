@@ -59,4 +59,12 @@ return {
       },
     },
   },
+  employees = {
+    {
+      name = "Tom",
+    },
+    {
+      name = "Elle",
+    },
+  },
 }
