@@ -527,13 +527,21 @@ local function match_tree(nodes, ast, path, parent, obj, count, skip)
 
   if type(obj) == "table" and match == MATCH_FILTER then
     for key, child in pairs(obj) do
-      local path1 = {}
-      table.insert(path1, type(key) == "string" and key or (key - 1))
+      local path1 = { type(key) == "string" and key or (key - 1) }
       local ast1 = {}
       for i = #path + 1, #ast do
         table.insert(ast1, ast[i])
       end
-      match_tree(nodes, ast1, path1, obj, child, count, path)
+      local skip1 = {}
+      if skip then
+        for i = 1, #skip do
+          table.insert(skip1, skip[i])
+        end
+      end
+      for i = 1, #path do
+        table.insert(skip1, path[i])
+      end
+      match_tree(nodes, ast1, path1, obj, child, count, skip1)
     end
   end
 end
