@@ -532,12 +532,7 @@ local function match_tree(nodes, ast, path, parent, obj, count, skip)
       for i = #path + 1, #ast do
         table.insert(ast1, ast[i])
       end
-      local skip1 = {}
-      if skip then
-        for i = 1, #skip do
-          table.insert(skip1, skip[i])
-        end
-      end
+      local skip1 = skip or {}
       for i = 1, #path do
         table.insert(skip1, path[i])
       end
