@@ -2,7 +2,7 @@ package = "jsonpath"
 version = "1.0-1"
 source = {
     url = "git://github.com/zeteref/lua-jsonpath",
-    tag = "1.0",
+    tag = "master",
 }
 description = {
     summary = "Query Lua data structures with JsonPath expressions. Robust and safe JsonPath engine for Lua.",
