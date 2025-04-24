@@ -945,8 +945,16 @@ testDocumentation = {
     })
   end,
 
-  testReadmeExpressionsFilterAllBooksThatCost8P95Title = function()
+  testReadmeExpressionsFilterAllStoreBooksThatCost8P95Title = function()
     local results, err = jp.nodes(data, "$.store.book[?(@.price==8.95)].title")
+    lu.assertNil(err)
+    lu.assertItemsEquals(results, {
+      { path = { "$", "store", "book", 0, "title" }, value = "Sayings of the Century" },
+    })
+  end,
+
+  testReadmeExpressionsFilterAllBooksThatCost8P95Title = function()
+    local results, err = jp.nodes(data, "$..book[?(@.price==8.95)].title")
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
       { path = { "$", "store", "book", 0, "title" }, value = "Sayings of the Century" },
