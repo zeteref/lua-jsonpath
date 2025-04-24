@@ -52,8 +52,8 @@ local lpeg = require("lpeg")
 package.path = "../?.lua;" .. package.path
 local jp = require("jsonpath")
 
--- Test data
-local data = require("data")
+-- Test store
+local store = require("data")
 
 -- Helper: sort node table by path
 function sortByPath(nodes)
@@ -338,13 +338,13 @@ testParseNegative = {
 testQuery = {
 
   testFirstLevelMember = function()
-    local results, err = jp.nodes(data, "$.store")
+    local results, err = jp.nodes(store, "$.store")
     lu.assertNil(err)
-    lu.assertItemsEquals(results, { { path = { "$", "store" }, value = data.store } })
+    lu.assertItemsEquals(results, { { path = { "$", "store" }, value = store.store } })
   end,
 
   testAuthorsOfAllBooksInTheStore = function()
-    local results, err = jp.nodes(data, "$.store.book[*].author")
+    local results, err = jp.nodes(store, "$.store.book[*].author")
     lu.assertNil(err)
     lu.assertItemsEquals(
       results,
@@ -358,7 +358,7 @@ testQuery = {
   end,
 
   testAllAuthors = function()
-    local results, err = jp.nodes(data, "$..author")
+    local results, err = jp.nodes(store, "$..author")
     lu.assertNil(err)
     lu.assertItemsEquals(
       results,
@@ -372,19 +372,19 @@ testQuery = {
   end,
 
   testAllThingsInStore = function()
-    local results, err = jp.nodes(data, "$.store.*")
+    local results, err = jp.nodes(store, "$.store.*")
     lu.assertNil(err)
     lu.assertItemsEquals(
       results,
       sortByPath({
-        { path = { "$", "store", "book" }, value = data.store.book },
-        { path = { "$", "store", "bicycle" }, value = data.store.bicycle },
+        { path = { "$", "store", "book" }, value = store.store.book },
+        { path = { "$", "store", "bicycle" }, value = store.store.bicycle },
       })
     )
   end,
 
   testPriceOfEverythingInTheStore = function()
-    local results, err = jp.nodes(data, "$.store..price")
+    local results, err = jp.nodes(store, "$.store..price")
     lu.assertNil(err)
     lu.assertItemsEquals(
       results,
@@ -399,78 +399,78 @@ testQuery = {
   end,
 
   testLastBookInOrderViaExpression = function()
-    local results, err = jp.nodes(data, "$..book[(@.length-1)]")
+    local results, err = jp.nodes(store, "$..book[(@.length-1)]")
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
-      { path = { "$", "store", "book", 3 }, value = data.store.book[4] },
+      { path = { "$", "store", "book", 3 }, value = store.store.book[4] },
     })
   end,
 
   testFirstTwoBooksViaUnion = function()
-    local results, err = jp.nodes(data, "$..book[0,1]")
+    local results, err = jp.nodes(store, "$..book[0,1]")
     lu.assertNil(err)
     lu.assertItemsEquals(
       results,
       sortByPath({
-        { path = { "$", "store", "book", 0 }, value = data.store.book[1] },
-        { path = { "$", "store", "book", 1 }, value = data.store.book[2] },
+        { path = { "$", "store", "book", 0 }, value = store.store.book[1] },
+        { path = { "$", "store", "book", 1 }, value = store.store.book[2] },
       })
     )
   end,
 
   testFirstTwoBooksViaSlice = function()
-    local results, err = jp.nodes(data, "$..book[0:2]")
+    local results, err = jp.nodes(store, "$..book[0:2]")
     lu.assertNil(err)
     lu.assertItemsEquals(
       results,
       sortByPath({
-        { path = { "$", "store", "book", 0 }, value = data.store.book[1] },
-        { path = { "$", "store", "book", 1 }, value = data.store.book[2] },
+        { path = { "$", "store", "book", 0 }, value = store.store.book[1] },
+        { path = { "$", "store", "book", 1 }, value = store.store.book[2] },
       })
     )
   end,
 
   testFilterAllBooksWithIsbnNumber = function()
-    local results, err = jp.nodes(data, "$..book[?(@.isbn)]")
+    local results, err = jp.nodes(store, "$..book[?(@.isbn)]")
     lu.assertNil(err)
     lu.assertItemsEquals(
       results,
       sortByPath({
-        { path = { "$", "store", "book", 2 }, value = data.store.book[3] },
-        { path = { "$", "store", "book", 3 }, value = data.store.book[4] },
+        { path = { "$", "store", "book", 2 }, value = store.store.book[3] },
+        { path = { "$", "store", "book", 3 }, value = store.store.book[4] },
       })
     )
   end,
 
   testFilterAllBooksWithAPriceLessThan10 = function()
-    local results, err = jp.nodes(data, "$..book[?(@.price<10)]")
+    local results, err = jp.nodes(store, "$..book[?(@.price<10)]")
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
-      { path = { "$", "store", "book", 0 }, value = data.store.book[1] },
-      { path = { "$", "store", "book", 2 }, value = data.store.book[3] },
+      { path = { "$", "store", "book", 0 }, value = store.store.book[1] },
+      { path = { "$", "store", "book", 2 }, value = store.store.book[3] },
     })
   end,
 
   testFirstTenOfAllElements = function()
-    local results, err = jp.nodes(data, "$..*", 10)
+    local results, err = jp.nodes(store, "$..*", 10)
     lu.assertNil(err)
     lu.assertIsTable(results)
     lu.assertEquals(#results, 10)
   end,
 
   testAllElements = function()
-    local results, err = jp.nodes(data, "$..*")
+    local results, err = jp.nodes(store, "$..*")
     lu.assertNil(err)
     lu.assertItemsEquals(
       results,
       sortByPath({
-        { path = { "$", "store" }, value = data.store },
-        { path = { "$", "store", "book" }, value = data.store.book },
-        { path = { "$", "store", "bicycle" }, value = data.store.bicycle },
-        { path = { "$", "store", "book", 0 }, value = data.store.book[1] },
-        { path = { "$", "store", "book", 1 }, value = data.store.book[2] },
-        { path = { "$", "store", "book", 2 }, value = data.store.book[3] },
-        { path = { "$", "store", "book", 3 }, value = data.store.book[4] },
+        { path = { "$", "store" }, value = store.store },
+        { path = { "$", "store", "book" }, value = store.store.book },
+        { path = { "$", "store", "bicycle" }, value = store.store.bicycle },
+        { path = { "$", "store", "book", 0 }, value = store.store.book[1] },
+        { path = { "$", "store", "book", 1 }, value = store.store.book[2] },
+        { path = { "$", "store", "book", 2 }, value = store.store.book[3] },
+        { path = { "$", "store", "book", 3 }, value = store.store.book[4] },
         { path = { "$", "store", "book", 0, "category" }, value = "reference" },
         { path = { "$", "store", "book", 0, "author" }, value = "Nigel Rees" },
         { path = { "$", "store", "book", 0, "title" }, value = "Sayings of the Century" },
@@ -496,226 +496,226 @@ testQuery = {
   end,
 
   testAllElementsViaSubscriptWildcard = function()
-    local results, err = jp.nodes(data, "$..[*]")
+    local results, err = jp.nodes(store, "$..[*]")
     lu.assertNil(err)
-    lu.assertItemsEquals(results, jp.nodes(data, "$..*"))
+    lu.assertItemsEquals(results, jp.nodes(store, "$..*"))
   end,
 
   testObjectSubscriptWildcard = function()
-    local results, err = jp.query(data, "$.store[*]")
+    local results, err = jp.query(store, "$.store[*]")
     lu.assertNil(err)
-    lu.assertItemsEquals(results, { data.store.book, data.store.bicycle })
+    lu.assertItemsEquals(results, { store.store.book, store.store.bicycle })
   end,
 
   testNoMatchReturnsEmptyArray = function()
-    local results, err = jp.nodes(data, "$..bookz")
+    local results, err = jp.nodes(store, "$..bookz")
     lu.assertNil(err)
     lu.assertItemsEquals(results, {})
   end,
 
   testMemberNumericLiteralGetsFirstElement = function()
-    local results, err = jp.nodes(data, "$.store.book.0")
+    local results, err = jp.nodes(store, "$.store.book.0")
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
-      { path = { "$", "store", "book", 0 }, value = data.store.book[1] },
+      { path = { "$", "store", "book", 0 }, value = store.store.book[1] },
     })
   end,
 
   testDescendantNumericLiteralGetsFirstElement = function()
-    local results, err = jp.nodes(data, "$.store.book..0")
+    local results, err = jp.nodes(store, "$.store.book..0")
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
-      { path = { "$", "store", "book", 0 }, value = data.store.book[1] },
+      { path = { "$", "store", "book", 0 }, value = store.store.book[1] },
     })
   end,
 
   testRootElementGetsUsOriginalObj = function()
-    local results, err = jp.nodes(data, "$")
+    local results, err = jp.nodes(store, "$")
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
-      { path = { "$" }, value = data },
+      { path = { "$" }, value = store },
     })
   end,
 
   test_SubscriptDoubleQuotedString = function()
-    local results, err = jp.nodes(data, '$["store"]')
+    local results, err = jp.nodes(store, '$["store"]')
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
-      { path = { "$", "store" }, value = data.store },
+      { path = { "$", "store" }, value = store.store },
     })
   end,
 
   testSubscriptSingleQuotedString = function()
-    local results, err = jp.nodes(data, "$['store']")
+    local results, err = jp.nodes(store, "$['store']")
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
-      { path = { "$", "store" }, value = data.store },
+      { path = { "$", "store" }, value = store.store },
     })
   end,
 
   testLeadingMemberComponent = function()
-    local results, err = jp.nodes(data, "store")
+    local results, err = jp.nodes(store, "store")
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
-      { path = { "$", "store" }, value = data.store },
+      { path = { "$", "store" }, value = store.store },
     })
   end,
 
   testUnionOfThreeArraySlices = function()
-    local results, err = jp.query(data, "$.store.book[0:1,1:2,2:3]")
+    local results, err = jp.query(store, "$.store.book[0:1,1:2,2:3]")
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
-      data.store.book[1],
-      data.store.book[2],
-      data.store.book[3],
+      store.store.book[1],
+      store.store.book[2],
+      store.store.book[3],
     })
   end,
 
   testSliceWithStepGreaterThan1 = function()
-    local results, err = jp.query(data, "$.store.book[0:4:2]")
+    local results, err = jp.query(store, "$.store.book[0:4:2]")
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
-      data.store.book[1],
-      data.store.book[3],
+      store.store.book[1],
+      store.store.book[3],
     })
   end,
 
   testSliceLastSlice = function()
-    local results, err = jp.query(data, "$.store.book[-1:]")
+    local results, err = jp.query(store, "$.store.book[-1:]")
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
-      data.store.book[4],
+      store.store.book[4],
     })
   end,
 
   testSliceLastTwoSlices = function()
-    local results, err = jp.query(data, "$.store.book[-2:]")
+    local results, err = jp.query(store, "$.store.book[-2:]")
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
-      data.store.book[3],
-      data.store.book[4],
+      store.store.book[3],
+      store.store.book[4],
     })
   end,
 
   testSliceSecondToLastSlice = function()
-    local results, err = jp.query(data, "$.store.book[-2:-1]")
+    local results, err = jp.query(store, "$.store.book[-2:-1]")
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
-      data.store.book[3],
+      store.store.book[3],
     })
   end,
 
   testUnionOfSubscriptStringLiteralKeys = function()
-    local results, err = jp.nodes(data, "$.store['book','bicycle']")
+    local results, err = jp.nodes(store, "$.store['book','bicycle']")
     lu.assertNil(err)
     lu.assertItemsEquals(
       results,
       sortByPath({
-        { path = { "$", "store", "book" }, value = data.store.book },
-        { path = { "$", "store", "bicycle" }, value = data.store.bicycle },
+        { path = { "$", "store", "book" }, value = store.store.book },
+        { path = { "$", "store", "bicycle" }, value = store.store.bicycle },
       })
     )
   end,
 
   testUnionOfSubscriptStringLiteralThreeKeys = function()
-    local results, err = jp.nodes(data, "$.store.book[0]['title','author','price']")
+    local results, err = jp.nodes(store, "$.store.book[0]['title','author','price']")
     lu.assertNil(err)
     lu.assertItemsEquals(
       results,
       sortByPath({
-        { path = { "$", "store", "book", 0, "title" }, value = data.store.book[1].title },
-        { path = { "$", "store", "book", 0, "author" }, value = data.store.book[1].author },
-        { path = { "$", "store", "book", 0, "price" }, value = data.store.book[1].price },
+        { path = { "$", "store", "book", 0, "title" }, value = store.store.book[1].title },
+        { path = { "$", "store", "book", 0, "author" }, value = store.store.book[1].author },
+        { path = { "$", "store", "book", 0, "price" }, value = store.store.book[1].price },
       })
     )
   end,
 
   testUnionOfSubscriptIntegerThreeKeysFollowedByMemberChildIdentifier = function()
-    local results, err = jp.nodes(data, "$.store.book[1,2,3]['title']")
+    local results, err = jp.nodes(store, "$.store.book[1,2,3]['title']")
     lu.assertNil(err)
     lu.assertItemsEquals(
       results,
       sortByPath({
-        { path = { "$", "store", "book", 1, "title" }, value = data.store.book[2].title },
-        { path = { "$", "store", "book", 2, "title" }, value = data.store.book[3].title },
-        { path = { "$", "store", "book", 3, "title" }, value = data.store.book[4].title },
+        { path = { "$", "store", "book", 1, "title" }, value = store.store.book[2].title },
+        { path = { "$", "store", "book", 2, "title" }, value = store.store.book[3].title },
+        { path = { "$", "store", "book", 3, "title" }, value = store.store.book[4].title },
       })
     )
   end,
 
   testUnionOfSubscriptIntegerThreeKeysFollowedByUnionOfSubscriptStringLiteralThreeKeys = function()
-    local results, err = jp.nodes(data, "$.store.book[0,1,2,3]['title','author','price']")
+    local results, err = jp.nodes(store, "$.store.book[0,1,2,3]['title','author','price']")
     lu.assertNil(err)
     lu.assertItemsEquals(
       results,
       sortByPath({
-        { path = { "$", "store", "book", 0, "title" }, value = data.store.book[1].title },
-        { path = { "$", "store", "book", 0, "author" }, value = data.store.book[1].author },
-        { path = { "$", "store", "book", 0, "price" }, value = data.store.book[1].price },
-        { path = { "$", "store", "book", 1, "title" }, value = data.store.book[2].title },
-        { path = { "$", "store", "book", 1, "author" }, value = data.store.book[2].author },
-        { path = { "$", "store", "book", 1, "price" }, value = data.store.book[2].price },
-        { path = { "$", "store", "book", 2, "title" }, value = data.store.book[3].title },
-        { path = { "$", "store", "book", 2, "author" }, value = data.store.book[3].author },
-        { path = { "$", "store", "book", 2, "price" }, value = data.store.book[3].price },
-        { path = { "$", "store", "book", 3, "title" }, value = data.store.book[4].title },
-        { path = { "$", "store", "book", 3, "author" }, value = data.store.book[4].author },
-        { path = { "$", "store", "book", 3, "price" }, value = data.store.book[4].price },
+        { path = { "$", "store", "book", 0, "title" }, value = store.store.book[1].title },
+        { path = { "$", "store", "book", 0, "author" }, value = store.store.book[1].author },
+        { path = { "$", "store", "book", 0, "price" }, value = store.store.book[1].price },
+        { path = { "$", "store", "book", 1, "title" }, value = store.store.book[2].title },
+        { path = { "$", "store", "book", 1, "author" }, value = store.store.book[2].author },
+        { path = { "$", "store", "book", 1, "price" }, value = store.store.book[2].price },
+        { path = { "$", "store", "book", 2, "title" }, value = store.store.book[3].title },
+        { path = { "$", "store", "book", 2, "author" }, value = store.store.book[3].author },
+        { path = { "$", "store", "book", 2, "price" }, value = store.store.book[3].price },
+        { path = { "$", "store", "book", 3, "title" }, value = store.store.book[4].title },
+        { path = { "$", "store", "book", 3, "author" }, value = store.store.book[4].author },
+        { path = { "$", "store", "book", 3, "price" }, value = store.store.book[4].price },
       })
     )
   end,
 
   testUnionOfSubscript4ArraySlicesFollowedByUnionOfSubscriptStringLiteralThreeKeys = function()
-    local results, err = jp.nodes(data, "$.store.book[0:1,1:2,2:3,3:4]['title','author','price']")
+    local results, err = jp.nodes(store, "$.store.book[0:1,1:2,2:3,3:4]['title','author','price']")
     lu.assertNil(err)
     lu.assertItemsEquals(
       results,
       sortByPath({
-        { path = { "$", "store", "book", 0, "title" }, value = data.store.book[1].title },
-        { path = { "$", "store", "book", 0, "author" }, value = data.store.book[1].author },
-        { path = { "$", "store", "book", 0, "price" }, value = data.store.book[1].price },
-        { path = { "$", "store", "book", 1, "title" }, value = data.store.book[2].title },
-        { path = { "$", "store", "book", 1, "author" }, value = data.store.book[2].author },
-        { path = { "$", "store", "book", 1, "price" }, value = data.store.book[2].price },
-        { path = { "$", "store", "book", 2, "title" }, value = data.store.book[3].title },
-        { path = { "$", "store", "book", 2, "author" }, value = data.store.book[3].author },
-        { path = { "$", "store", "book", 2, "price" }, value = data.store.book[3].price },
-        { path = { "$", "store", "book", 3, "title" }, value = data.store.book[4].title },
-        { path = { "$", "store", "book", 3, "author" }, value = data.store.book[4].author },
-        { path = { "$", "store", "book", 3, "price" }, value = data.store.book[4].price },
+        { path = { "$", "store", "book", 0, "title" }, value = store.store.book[1].title },
+        { path = { "$", "store", "book", 0, "author" }, value = store.store.book[1].author },
+        { path = { "$", "store", "book", 0, "price" }, value = store.store.book[1].price },
+        { path = { "$", "store", "book", 1, "title" }, value = store.store.book[2].title },
+        { path = { "$", "store", "book", 1, "author" }, value = store.store.book[2].author },
+        { path = { "$", "store", "book", 1, "price" }, value = store.store.book[2].price },
+        { path = { "$", "store", "book", 2, "title" }, value = store.store.book[3].title },
+        { path = { "$", "store", "book", 2, "author" }, value = store.store.book[3].author },
+        { path = { "$", "store", "book", 2, "price" }, value = store.store.book[3].price },
+        { path = { "$", "store", "book", 3, "title" }, value = store.store.book[4].title },
+        { path = { "$", "store", "book", 3, "author" }, value = store.store.book[4].author },
+        { path = { "$", "store", "book", 3, "price" }, value = store.store.book[4].price },
       })
     )
   end,
 
   testNestedParenthesesEval = function()
     local pathExpression = "$..book[?( @.price && (@.price + 20 || false) )]"
-    local results, err = jp.query(data, pathExpression)
+    local results, err = jp.query(store, pathExpression)
     lu.assertNil(err)
-    lu.assertItemsEquals(results, data.store.book)
+    lu.assertItemsEquals(results, store.store.book)
   end,
 
   testArrayIndicesFrom0To100 = function()
-    local data = {}
+    local store = {}
     for i = 1, 100 do
-      data[i] = math.random()
+      store[i] = math.random()
     end
     for i = 1, 100 do
-      local results, err = jp.query(data, "$[" .. tostring(i - 1) .. "]")
+      local results, err = jp.query(store, "$[" .. tostring(i - 1) .. "]")
       lu.assertNil(err)
-      lu.assertItemsEquals(results, { data[i] })
+      lu.assertItemsEquals(results, { store[i] })
     end
   end,
 
   testDescendantSubscriptNumericLiteral1 = function()
-    local data = { 0, { 1, 2, 3 }, { 4, 5, 6 } }
-    local results, err = jp.query(data, "$..[0]")
+    local store = { 0, { 1, 2, 3 }, { 4, 5, 6 } }
+    local results, err = jp.query(store, "$..[0]")
     lu.assertNil(err)
     lu.assertItemsEquals(results, { 0, 1, 4 })
   end,
 
   testDescendantSubscriptNumericLiteral2 = function()
-    local data = { 0, 1, { 2, 3, 4 }, { 5, 6, 7, { 8, 9, 10 } } }
-    local results, err = jp.query(data, "$..[0,1]")
+    local store = { 0, 1, { 2, 3, 4 }, { 5, 6, 7, { 8, 9, 10 } } }
+    local results, err = jp.query(store, "$..[0,1]")
     lu.assertNil(err)
     lu.assertItemsEquals(results, { 0, 1, 2, 3, 5, 6, 8, 9 })
   end,
@@ -748,20 +748,20 @@ testQuery = {
 testLessons = {
   testCommaInEval = function()
     local path = "$..book[?(@.price && ',')]"
-    local results, err = jp.query(data, path)
+    local results, err = jp.query(store, path)
     lu.assertNil(err)
-    lu.assertItemsEquals(results, data.store.book)
+    lu.assertItemsEquals(results, store.store.book)
   end,
 
   testMemberNamesWithDots = function()
-    local data = { ["www.google.com"] = 42, ["www.wikipedia.org"] = 190 }
-    local results, err = jp.query(data, "$['www.google.com']")
+    local store = { ["www.google.com"] = 42, ["www.wikipedia.org"] = 190 }
+    local results, err = jp.query(store, "$['www.google.com']")
     lu.assertNil(err)
     lu.assertItemsEquals(results, { 42 })
   end,
 
   testNestedObjectsWithFilter = function()
-    local data = {
+    local store = {
       dataResult = {
         object = {
           objectInfo = {
@@ -772,32 +772,32 @@ testLessons = {
         },
       },
     }
-    local results, err = jp.query(data, "$..object[?(@.className=='folder')]")
+    local results, err = jp.query(store, "$..object[?(@.className=='folder')]")
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
-      data.dataResult.object.objectInfo,
+      store.dataResult.object.objectInfo,
     })
   end,
 
   testScriptExpressionsWithAtChar = function()
-    local data = {
+    local store = {
       DIV = { {
         ["@class"] = "value",
         val = 5,
       } },
     }
-    local results, err = jp.query(data, "$..DIV[?(@['@class']=='value')]")
+    local results, err = jp.query(store, "$..DIV[?(@['@class']=='value')]")
     lu.assertNil(err)
-    lu.assertItemsEquals(results, data.DIV)
+    lu.assertItemsEquals(results, store.DIV)
   end,
 }
 
 testSugar = {
   testValueMethodGetsUsAValue = function()
-    local data = { a = 1, b = 2, c = 3, z = { a = 100, b = 200 } }
-    local b, err = jp.value(data, "$..b")
+    local store = { a = 1, b = 2, c = 3, z = { a = 100, b = 200 } }
+    local b, err = jp.value(store, "$..b")
     lu.assertNil(err)
-    lu.assertItemsEquals(b, data.b)
+    lu.assertItemsEquals(b, store.b)
   end,
 }
 
@@ -808,7 +808,7 @@ testGrammer = {
     local var, ast = assignment:match('x="$..author"')
     lu.assertItemsEquals(var, "x")
     lu.assertItemsEquals(ast, { "$", "..", "author" })
-    local results, err = jp.nodes(data, ast)
+    local results, err = jp.nodes(store, ast)
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
       { path = { "$", "store", "book", 0, "author" }, value = "Nigel Rees" },
@@ -823,7 +823,7 @@ testGrammer = {
     local var, ast = assignment:match('x="$..author"')
     lu.assertItemsEquals(var, "x")
     lu.assertItemsEquals(ast, { "$", "..", "author" })
-    local results, err = jp.query(data, ast)
+    local results, err = jp.query(store, ast)
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
       "Nigel Rees",
@@ -865,12 +865,12 @@ testDocumentation = {
   end,
 
   testReadmeExpressionsTheThirdBookViaArraySubscript = function()
-    local results, err = jp.nodes(data, "$..book[2]")
+    local results, err = jp.nodes(store, "$..book[2]")
     lu.assertNil(err)
     lu.assertItemsEquals(
       results,
       sortByPath({
-        { path = { "$", "store", "book", 2 }, value = data.store.book[3] },
+        { path = { "$", "store", "book", 2 }, value = store.store.book[3] },
       })
     )
   end,
@@ -880,35 +880,35 @@ testDocumentation = {
   end,
 
   testReadmeExpressionsTheLastBookInOrder = function()
-    local results, err = jp.nodes(data, "$..book[-1:]")
+    local results, err = jp.nodes(store, "$..book[-1:]")
     lu.assertNil(err)
     lu.assertItemsEquals(
       results,
       sortByPath({
-        { path = { "$", "store", "book", 3 }, value = data.store.book[4] },
+        { path = { "$", "store", "book", 3 }, value = store.store.book[4] },
       })
     )
   end,
 
   testReadmeExpressionsTheLastTwoBooksInOrder = function()
-    local results, err = jp.nodes(data, "$..book[-2:]")
+    local results, err = jp.nodes(store, "$..book[-2:]")
     lu.assertNil(err)
     lu.assertItemsEquals(
       results,
       sortByPath({
-        { path = { "$", "store", "book", 2 }, value = data.store.book[3] },
-        { path = { "$", "store", "book", 3 }, value = data.store.book[4] },
+        { path = { "$", "store", "book", 2 }, value = store.store.book[3] },
+        { path = { "$", "store", "book", 3 }, value = store.store.book[4] },
       })
     )
   end,
 
   testReadmeExpressionsTheSecondToLastBookInOrder = function()
-    local results, err = jp.nodes(data, "$..book[-2:-1]")
+    local results, err = jp.nodes(store, "$..book[-2:-1]")
     lu.assertNil(err)
     lu.assertItemsEquals(
       results,
       sortByPath({
-        { path = { "$", "store", "book", 2 }, value = data.store.book[3] },
+        { path = { "$", "store", "book", 2 }, value = store.store.book[3] },
       })
     )
   end,
@@ -918,13 +918,13 @@ testDocumentation = {
   end,
 
   testReadmeExpressionsTheFirstTwoBooksViaSubscriptArraySlice = function()
-    local results, err = jp.nodes(data, "$..book[:2]")
+    local results, err = jp.nodes(store, "$..book[:2]")
     lu.assertNil(err)
     lu.assertItemsEquals(
       results,
       sortByPath({
-        { path = { "$", "store", "book", 0 }, value = data.store.book[1] },
-        { path = { "$", "store", "book", 1 }, value = data.store.book[2] },
+        { path = { "$", "store", "book", 0 }, value = store.store.book[1] },
+        { path = { "$", "store", "book", 1 }, value = store.store.book[2] },
       })
     )
   end,
@@ -938,15 +938,15 @@ testDocumentation = {
   end,
 
   testReadmeExpressionsFilterAllBooksThatCost8P95 = function()
-    local results, err = jp.nodes(data, "$..book[?(@.price==8.95)]")
+    local results, err = jp.nodes(store, "$..book[?(@.price==8.95)]")
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
-      { path = { "$", "store", "book", 0 }, value = data.store.book[1] },
+      { path = { "$", "store", "book", 0 }, value = store.store.book[1] },
     })
   end,
 
   testReadmeExpressionsFilterAllStoreBooksThatCost8P95Title = function()
-    local results, err = jp.nodes(data, "$.store.book[?(@.price==8.95)].title")
+    local results, err = jp.nodes(store, "$.store.book[?(@.price==8.95)].title")
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
       { path = { "$", "store", "book", 0, "title" }, value = "Sayings of the Century" },
@@ -954,7 +954,7 @@ testDocumentation = {
   end,
 
   testReadmeExpressionsFilterAllBooksThatCost8P95Title = function()
-    local results, err = jp.nodes(data, "$..book[?(@.price==8.95)].title")
+    local results, err = jp.nodes(store, "$..book[?(@.price==8.95)].title")
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
       { path = { "$", "store", "book", 0, "title" }, value = "Sayings of the Century" },
@@ -962,12 +962,12 @@ testDocumentation = {
   end,
 
   testReadmeExpressionsFilterAllFictionBooksCheaperThan30 = function()
-    local results, err = jp.nodes(data, '$..book[?(@.price<30 && @.category=="fiction")]')
+    local results, err = jp.nodes(store, '$..book[?(@.price<30 && @.category=="fiction")]')
     lu.assertNil(err)
     lu.assertItemsEquals(results, {
-      { path = { "$", "store", "book", 1 }, value = data.store.book[2] },
-      { path = { "$", "store", "book", 2 }, value = data.store.book[3] },
-      { path = { "$", "store", "book", 3 }, value = data.store.book[4] },
+      { path = { "$", "store", "book", 1 }, value = store.store.book[2] },
+      { path = { "$", "store", "book", 2 }, value = store.store.book[3] },
+      { path = { "$", "store", "book", 3 }, value = store.store.book[4] },
     })
   end,
 
@@ -976,19 +976,19 @@ testDocumentation = {
   end,
 
   testReadmeQueryExample = function()
-    local author, err = jp.query(data, "$..author")
+    local author, err = jp.query(store, "$..author")
     lu.assertNil(err)
     lu.assertItemsEquals(author, { "Nigel Rees", "Evelyn Waugh", "Herman Melville", "J. R. R. Tolkien" })
   end,
 
   testReadmeValueExample = function()
-    local author, err = jp.value(data, "$..author")
+    local author, err = jp.value(store, "$..author")
     lu.assertNil(err)
     lu.assertItemsEquals(author, "Nigel Rees")
   end,
 
   testReadmePathsExample = function()
-    local author, err = jp.paths(data, "$..author")
+    local author, err = jp.paths(store, "$..author")
     lu.assertNil(err)
     lu.assertItemsEquals(author, {
       { "$", "store", "book", 0, "author" },
