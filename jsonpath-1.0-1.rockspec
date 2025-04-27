@@ -1,9 +1,11 @@
 package = "jsonpath"
 version = "1.0-3"
+
 source = {
     url = "git://github.com/zeteref/lua-jsonpath",
     tag = "master",
 }
+
 description = {
     summary = "Query Lua data structures with JsonPath expressions. Robust and safe JsonPath engine for Lua.",
     detailed = [[
@@ -16,10 +18,12 @@ The Lua JsonPath library was written from scratch by Frank Edelhaeuser. It's a p
     homepage = "https://github.com/zeteref/lua-jsonpath",
     license = "MIT",
 }
+
 dependencies = {
     "lua >= 5.1",
     "lpeg >= 1.0.0",
 }
+
 build = {
     type = "builtin",
     modules = {
